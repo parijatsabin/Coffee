@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+
+  --color-coffee-50: #fdfaf7;
+  --color-coffee-100: #f7f0e8;
+  --color-coffee-200: #eedecf;
+  --color-coffee-300: #dfc4ad;
+  --color-coffee-400: #cba184;
+  --color-coffee-500: #ba8464;
+  --color-coffee-600: #a97054;
+  --color-coffee-700: #8c5a46;
+  --color-coffee-800: #714a3c;
+  --color-coffee-900: #5d3f34;
+  --color-coffee-950: #32201b;
+
+  --color-accent: #ff6b35; /* Vibrant orange for HAHA energy */
+  --color-accent-foreground: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply bg-coffee-50 text-coffee-950 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');

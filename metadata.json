@@ -1,0 +1,7 @@
+{
+  "name": "HAHA-Coffee",
+  "description": "Modern premium café with a workspace vibe. Coffee, light meals, and a community space for young professionals and students.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
