@@ -3,21 +3,22 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Menu as MenuIcon, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-import siteContent from '../data/site-content.json';
+import { useContent } from '../context/ContentContext';
 
 export default function Navbar({ itemCount }: { itemCount: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
+  const { content } = useContent();
 
-  const navLinks = siteContent.navigation;
+  const navLinks = content.navigation;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-coffee-50/80 backdrop-blur-md border-b border-coffee-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-display font-bold text-accent">{siteContent.brand.name}</span>
-            <span className="text-2xl font-display font-bold text-coffee-900">{siteContent.brand.suffix}</span>
+            <span className="text-2xl font-display font-bold text-accent">{content.brand.name}</span>
+            <span className="text-2xl font-display font-bold text-coffee-900">{content.brand.suffix}</span>
           </Link>
 
           {/* Desktop Nav */}

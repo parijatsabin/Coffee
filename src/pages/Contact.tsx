@@ -1,9 +1,10 @@
 import { motion } from 'motion/react';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
-import siteContent from '../data/site-content.json';
+import { useContent } from '../context/ContentContext';
 
 export default function Contact() {
-  const { contact } = siteContent;
+  const { content } = useContent();
+  const { contact } = content;
 
   return (
     <div className="pt-24 min-h-screen bg-coffee-50">
@@ -75,11 +76,11 @@ export default function Contact() {
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
-              title={`${siteContent.brand.name} Location`}
+              title={`${content.brand.name} Location`}
             ></iframe>
             <div className="absolute bottom-6 left-6 right-6 bg-white p-6 rounded-2xl shadow-lg flex items-center justify-between">
               <div>
-                <h4 className="font-bold">{siteContent.brand.name} Main</h4>
+                <h4 className="font-bold">{content.brand.name} Main</h4>
                 <p className="text-xs text-coffee-500">Open until 9:00 PM</p>
               </div>
               <button className="bg-accent text-white px-4 py-2 rounded-lg text-sm font-bold">Directions</button>

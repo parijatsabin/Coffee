@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Wifi, Battery, Coffee } from 'lucide-react';
 import { MENU_ITEMS } from '../data/menu';
-import siteContent from '../data/site-content.json';
+import { useContent } from '../context/ContentContext';
 
 const IconMap: Record<string, any> = {
   wifi: Wifi,
@@ -12,8 +12,9 @@ const IconMap: Record<string, any> = {
 };
 
 export default function Home() {
+  const { content } = useContent();
   const featuredItems = MENU_ITEMS.filter(item => item.popular).slice(0, 4);
-  const { hero, socialProof, experience, finalCTA } = siteContent.home;
+  const { hero, socialProof, experience, finalCTA } = content.home;
 
   return (
     <div className="overflow-hidden">

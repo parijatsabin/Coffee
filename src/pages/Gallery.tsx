@@ -1,8 +1,9 @@
 import { motion } from 'motion/react';
-import siteContent from '../data/site-content.json';
+import { useContent } from '../context/ContentContext';
 
 export default function Gallery() {
-  const { gallery } = siteContent;
+  const { content } = useContent();
+  const { gallery } = content;
 
   return (
     <div className="pt-24 pb-24 min-h-screen bg-coffee-50">

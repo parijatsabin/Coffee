@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { Coffee, Heart, Users, Globe } from 'lucide-react';
-import siteContent from '../data/site-content.json';
+import { useContent } from '../context/ContentContext';
 
 const IconMap: Record<string, any> = {
   heart: Heart,
@@ -10,7 +10,8 @@ const IconMap: Record<string, any> = {
 };
 
 export default function About() {
-  const { hero, values, team } = siteContent.about;
+  const { content } = useContent();
+  const { hero, values, team } = content.about;
 
   return (
     <div className="pt-24 min-h-screen bg-coffee-50">
