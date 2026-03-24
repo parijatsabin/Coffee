@@ -16,11 +16,30 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function loadContent() {
-      const data = await contentService.getContent();
-      setContent(data);
-      setLoading(false);
+      try {
+        const data = await contentService.getContent();
+        setContent(data);
+      } catch (error) {
+        console.error('Failed to load content:', error);
+        // Fallback to initial content if service fails
+        setContent(initialContent as SiteContent);
+      } finally {
+        setLoading(false);
+      }
     }
+
     loadContent();
+
+    // Fallback timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Content loading timeout, using initial content');
+        setContent(initialContent as SiteContent);
+        setLoading(false);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const updateContent = async (newContent: SiteContent) => {

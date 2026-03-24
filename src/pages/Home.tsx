@@ -12,8 +12,20 @@ const IconMap: Record<string, any> = {
 };
 
 export default function Home() {
-  const { content } = useContent();
+  const { content, loading } = useContent();
   const featuredItems = MENU_ITEMS.filter(item => item.popular).slice(0, 4);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-coffee-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-coffee-600">Loading HAHA Coffee...</p>
+        </div>
+      </div>
+    );
+  }
+
   const { hero, socialProof, experience, finalCTA } = content.home;
 
   return (
@@ -36,7 +48,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 
+            <h1
               className="text-5xl md:text-8xl font-display font-bold text-white mb-6 leading-tight"
               dangerouslySetInnerHTML={{ __html: hero.headline }}
             />
@@ -148,7 +160,7 @@ export default function Home() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 
+              <h2
                 className="text-4xl md:text-6xl mb-8 leading-tight"
                 dangerouslySetInnerHTML={{ __html: experience.headline }}
               />
