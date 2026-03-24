@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Save, RefreshCw, AlertCircle, CheckCircle, Layout, Coffee, Info, Image, Phone, LogOut, ChevronRight, Plus, Trash2, Edit2, Eye, EyeOff, Package, Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { productService, Product } from '../services/productService';
 import { orderService, Order } from '../services/orderService';
+import { galleryService, GalleryImage } from '../services/galleryService';
 
 type Section = 'brand' | 'navigation' | 'home' | 'menu' | 'about' | 'gallery' | 'contact' | 'footer' | 'raw' | 'products' | 'orders';
 
@@ -14,8 +15,10 @@ export default function Admin() {
   const [localContent, setLocalContent] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [editingGalleryImage, setEditingGalleryImage] = useState<Partial<GalleryImage> | null>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [activeSection, setActiveSection] = useState<Section>('brand');
@@ -43,6 +46,8 @@ export default function Admin() {
       return () => {
         subscription.unsubscribe();
       };
+    } else if (activeSection === 'gallery') {
+      fetchGalleryImages();
     }
   }, [activeSection]);
 
@@ -54,6 +59,32 @@ export default function Admin() {
   const fetchOrders = async () => {
     const data = await orderService.getOrders();
     setOrders(data);
+  };
+
+  const fetchGalleryImages = async () => {
+    const data = await galleryService.getImages();
+    setGalleryImages(data);
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSaving(true);
+    const url = await galleryService.uploadImage(file);
+    if (url) {
+      await galleryService.addImage({
+        url,
+        caption: '',
+        category: 'General'
+      });
+      fetchGalleryImages();
+      setStatus({ type: 'success', message: 'Image uploaded successfully!' });
+    } else {
+      setStatus({ type: 'error', message: 'Failed to upload image.' });
+    }
+    setSaving(false);
+    setTimeout(() => setStatus(null), 3000);
   };
 
   const handleSave = async () => {
@@ -336,6 +367,121 @@ export default function Admin() {
                             className="text-red-600 font-bold text-sm flex items-center gap-2 hover:underline"
                           >
                             <Trash2 size={16} /> Delete Order Record
+                          </button>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {activeSection === 'gallery' && (
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-bold text-coffee-950">Gallery Management</h3>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={fetchGalleryImages}
+                      className="p-2 text-coffee-600 hover:text-accent transition-all"
+                    >
+                      <RefreshCw size={20} />
+                    </button>
+                    <label className="bg-accent text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-accent/90 transition-all cursor-pointer">
+                      <Plus size={18} /> Upload Image
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleGalleryUpload}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {galleryImages.map((image) => (
+                    <div key={image.id} className="group relative aspect-square rounded-2xl overflow-hidden border border-coffee-100 shadow-sm">
+                      <img src={image.url} alt={image.caption} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                      <div className="absolute inset-0 bg-coffee-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 text-center">
+                        <p className="text-white text-xs font-bold mb-4 line-clamp-2">{image.caption || 'No caption'}</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setEditingGalleryImage(image)}
+                            className="p-2 bg-white/20 hover:bg-white/40 rounded-lg text-white transition-all"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (confirm('Delete this image from gallery?')) {
+                                await galleryService.deleteImage(image.id);
+                                fetchGalleryImages();
+                              }
+                            }}
+                            className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-red-200 transition-all"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Edit Gallery Image Modal */}
+                <AnimatePresence>
+                  {editingGalleryImage && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-coffee-950/20 backdrop-blur-sm">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 space-y-6"
+                      >
+                        <h3 className="text-xl font-bold text-coffee-950">Edit Image Details</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold text-coffee-600 mb-1">Caption</label>
+                            <input
+                              type="text"
+                              value={editingGalleryImage.caption}
+                              onChange={(e) => setEditingGalleryImage({ ...editingGalleryImage, caption: e.target.value })}
+                              className="w-full px-3 py-2 bg-coffee-50 border border-coffee-100 rounded-lg focus:outline-none focus:border-accent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-coffee-600 mb-1">Category</label>
+                            <input
+                              type="text"
+                              value={editingGalleryImage.category}
+                              onChange={(e) => setEditingGalleryImage({ ...editingGalleryImage, category: e.target.value })}
+                              className="w-full px-3 py-2 bg-coffee-50 border border-coffee-100 rounded-lg focus:outline-none focus:border-accent"
+                              placeholder="e.g. Interior, Coffee, Events"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-4">
+                          <button
+                            onClick={() => setEditingGalleryImage(null)}
+                            className="flex-1 px-4 py-2 bg-coffee-50 text-coffee-600 font-bold rounded-xl hover:bg-coffee-100 transition-all"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (editingGalleryImage.id) {
+                                await galleryService.updateImage(editingGalleryImage.id, {
+                                  caption: editingGalleryImage.caption,
+                                  category: editingGalleryImage.category
+                                });
+                                setEditingGalleryImage(null);
+                                fetchGalleryImages();
+                              }
+                            }}
+                            className="flex-1 px-4 py-2 bg-accent text-white font-bold rounded-xl hover:bg-accent/90 transition-all"
+                          >
+                            Save Changes
                           </button>
                         </div>
                       </motion.div>
