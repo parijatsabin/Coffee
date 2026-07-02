@@ -50,6 +50,43 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Routes that should NOT show the site Navbar/Footer
+const ADMIN_ROUTES = ['/admin', '/login'];
+
+function SiteLayout({ children, itemCount, total }: {
+  children: React.ReactNode;
+  itemCount: number;
+  total: number;
+}) {
+  const { pathname } = useLocation();
+  const isAdminRoute = ADMIN_ROUTES.some(r => pathname.startsWith(r));
+
+  if (isAdminRoute) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar itemCount={itemCount} />
+      <main className="flex-grow">{children}</main>
+      <Footer />
+      {/* Mobile Sticky CTA */}
+      <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
+        <a
+          href="/order"
+          className="flex items-center justify-between bg-accent text-white px-6 py-4 rounded-2xl shadow-2xl font-bold"
+        >
+          <span>Order Now</span>
+          <div className="flex items-center gap-2">
+            <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">{itemCount} items</span>
+            <span className="text-lg">${total.toFixed(2)}</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, itemCount, total } = useCart();
 
@@ -57,40 +94,22 @@ export default function App() {
     <ContentProvider>
       <Router>
         <ScrollToTop />
-        <div className="flex flex-col min-h-screen">
-          <Navbar itemCount={itemCount} />
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/menu" element={<Menu addToCart={addToCart} />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/order" element={<Order cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} clearCart={clearCart} total={total} />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </main>
-          <Footer />
-
-          {/* Mobile Sticky CTA */}
-          <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
-            <a
-              href="/order"
-              className="flex items-center justify-between bg-accent text-white px-6 py-4 rounded-2xl shadow-2xl font-bold"
-            >
-              <span>Order Now</span>
-              <div className="flex items-center gap-2">
-                <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">{itemCount} items</span>
-                <span className="text-lg">${total.toFixed(2)}</span>
-              </div>
-            </a>
-          </div>
-        </div>
+        <SiteLayout itemCount={itemCount} total={total}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/menu" element={<Menu addToCart={addToCart} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/order" element={<Order cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} clearCart={clearCart} total={total} />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </SiteLayout>
       </Router>
     </ContentProvider>
   );
