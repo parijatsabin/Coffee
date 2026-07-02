@@ -1,4 +1,5 @@
-import siteContent from './site-content.json';
+// Menu items are now loaded from the database via productService.
+// This file is kept for type compatibility only.
 
 export interface MenuItem {
   id: string;
@@ -10,4 +11,4 @@ export interface MenuItem {
   popular?: boolean;
 }
 
-export const MENU_ITEMS: MenuItem[] = siteContent.menu.items as MenuItem[];
+export const MENU_ITEMS: MenuItem[] = [];

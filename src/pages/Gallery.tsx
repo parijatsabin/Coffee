@@ -19,7 +19,7 @@ export default function Gallery() {
     fetchImages();
   }, []);
 
-  const displayImages = images.length > 0 ? images.map(img => img.url) : gallery.images;
+  const displayImages = images.length > 0 ? images.map(img => img.url) : [];
 
   return (
     <div className="pt-24 pb-24 min-h-screen bg-coffee-50">

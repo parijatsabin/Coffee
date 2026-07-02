@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Plus, Check, RefreshCw } from 'lucide-react';
+import { Search, Plus, Check, RefreshCw } from 'lucide-react';
 import { MenuItem } from '../data/menu';
 import { cn } from '../lib/utils';
 import { useContent } from '../context/ContentContext';
@@ -14,34 +14,21 @@ export default function Menu({ addToCart }: { addToCart: (item: MenuItem) => voi
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { headline, description, categories, searchPlaceholder, items: MENU_ITEMS } = content.menu;
+  const { headline, description, categories, searchPlaceholder } = content.menu;
 
   useEffect(() => {
     async function loadProducts() {
       const data = await productService.getProducts();
-      if (data.length > 0) {
-        setProducts(data);
-      } else {
-        // Fallback to CMS items if table is empty or doesn't exist
-        setProducts(MENU_ITEMS.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          category: item.category,
-          image_url: item.image,
-          is_available: true
-        })));
-      }
+      setProducts(data);
       setLoading(false);
     }
     loadProducts();
-  }, [MENU_ITEMS]);
+  }, []);
 
   const filteredItems = products.filter(item => {
     const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch && item.is_available;
   });
 

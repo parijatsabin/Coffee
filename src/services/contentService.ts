@@ -6,7 +6,12 @@ export interface SiteContent {
   navigation: any[];
   home: any;
   about: any;
-  menu: any;
+  menu: {
+    headline: string;
+    description: string;
+    searchPlaceholder: string;
+    categories: string[];
+  };
   gallery: any;
   contact: any;
   footer: any;
@@ -19,16 +24,30 @@ export const contentService = {
     try {
       const { data, error } = await supabase
         .from('site_content')
-        .select('value')
-        .eq('key', CONTENT_KEY)
-        .single();
+        .select('content')
+        .eq('section_key', CONTENT_KEY)
+        .maybeSingle();
 
       if (error) {
         console.warn('Supabase error, falling back to local content:', error.message);
         return initialContent as SiteContent;
       }
 
-      return data.value as SiteContent;
+      if (data?.content) {
+        return data.content as SiteContent;
+      }
+
+      const fallback = await supabase
+        .from('site_content')
+        .select('content')
+        .eq('section_key', 'brand')
+        .maybeSingle();
+
+      if (fallback.data?.content) {
+        return fallback.data.content as SiteContent;
+      }
+
+      return initialContent as SiteContent;
     } catch (err) {
       console.error('Failed to fetch content from Supabase:', err);
       return initialContent as SiteContent;
@@ -39,7 +58,15 @@ export const contentService = {
     try {
       const { error } = await supabase
         .from('site_content')
-        .upsert({ key: CONTENT_KEY, value: content }, { onConflict: 'key' });
+        .upsert(
+          {
+            section_key: CONTENT_KEY,
+            content,
+            description: 'Main site content',
+            is_active: true,
+          },
+          { onConflict: 'section_key' }
+        );
 
       if (error) throw error;
       return true;

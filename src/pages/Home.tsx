@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Wifi, Battery, Coffee } from 'lucide-react';
-import { MENU_ITEMS } from '../data/menu';
 import { useContent } from '../context/ContentContext';
+import { productService, Product } from '../services/productService';
 
 const IconMap: Record<string, any> = {
   wifi: Wifi,
@@ -13,7 +14,13 @@ const IconMap: Record<string, any> = {
 
 export default function Home() {
   const { content, loading } = useContent();
-  const featuredItems = MENU_ITEMS.filter(item => item.popular).slice(0, 4);
+  const [featuredItems, setFeaturedItems] = useState<Product[]>([]);
+
+  useEffect(() => {
+    productService.getProducts().then(products => {
+      setFeaturedItems(products.filter(p => p.is_available).slice(0, 4));
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -126,7 +133,7 @@ export default function Home() {
               >
                 <div className="aspect-square overflow-hidden">
                   <img
-                    src={item.image}
+                    src={item.image_url}
                     alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
